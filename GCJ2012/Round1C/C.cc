@@ -27,51 +27,42 @@ void read(){
     }
 }
 
-struct RECORD{
-    RECORD(){
-        iup_pos = 0;
-        iup_res = 0;
-        jup_pos = 0;
-        jup_res = 0;
-    }
-    long long iup_pos;
-    long long iup_res;
-    long long jup_pos;
-    long long jup_res;
-};
-
 void solve(int ca){
     //printf("Case #%d: ");
     cout << "Case #" << ca << ": ";
-
-    static RECORD rec[200][200];
+    long long dp[101][101] = { 0 };
 
     for (int i = 1; i <= N; i++){
     for (int j = 1; j <= M; j++){
+        long long ans = 0;
+        ans = max(dp[i-1][j], dp[i][j-1]);
         if (toy[i] == box[j]){
-            
-            //i , j-1
-            long long fwd = min(tn[i] - rec[i][j-1].jup_pos, bn[j]);
-            rec[i][j].jup_pos = rec[i][j-1].jup_pos + fwd;
-            rec[i][j].jup_res = rec[i][j-1].jup_res + fwd;
-
-            fwd = min(bn[j] - rec[i-1][j].iup_pos, tn[i]);
-            rec[i][j].jup_pos = rec[i-1][j].jup_pos + fwd;
-            rec[i][j].jup_res = rec[i-1][j].jup_res + fwd;
-
-        }else{
-            rec[i][j].iup_pos = rec[i-1][j].iup_pos;
-            rec[i][j].
-            rec[i][j].iup_res = rec[i-1][j].iup_res;
-            rec[i][j].jup_pos = rec[i][j-1].jup_pos;
-            rec[i][j].jup_res = rec[i][j-1].jup_res;
+            int type = toy[i];
+            int x = i, y = j;
+            long long toy_num = tn[x];
+            long long box_num = bn[y];
+            do{
+                ans = max(ans, dp[x-1][y-1] + min(toy_num, box_num));
+                if (toy_num == box_num){
+                    break;
+                }
+                if (toy_num > box_num){
+                    do{
+                        y--;
+                    }while(y > 0 && box[y] != type);
+                    box_num += bn[y];
+                }else{
+                    do{
+                        x--;
+                    }while(x > 0 && toy[x] != type);
+                    toy_num += tn[x];
+                }
+            }while(x > 0 && y > 0);
         }
-        
+        dp[i][j] = ans;
     }
     }
-
-    cout << max(rec[N][M].iup_res, rec[N][M].jup_res);
-
+    printf("%lld\n", dp[N][M]);
 }
 
 };
