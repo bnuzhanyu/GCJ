@@ -24,6 +24,22 @@ template<typename T>
 using VEC = vector<T>;
 
 template<typename T>
+using MAT = vector<vector<T> >;
+
+template<typename T>
+void print(const VEC<T>& vec) {
+    for (const auto& e : vec) cout << e << " ";
+    cout << endl;
+}
+
+template<typename T>
+void print_with_idx(const VEC<T>& vec) {
+    FOR(i,0,vec.size()) {
+        cout << i << ":" << vec[i] << endl;
+    }
+}
+
+template<typename T>
 void read_vec(VEC<T>& vec, int n, bool need_clear = true) {
     if (need_clear) vec.clear();
     FOR(i,0,n){
@@ -32,8 +48,17 @@ void read_vec(VEC<T>& vec, int n, bool need_clear = true) {
     }
 }
 
-const int LEFT = 0;
-const int RIGHT = 1;
+template<typename T>
+void read_mat(MAT<T>& mat, int r, int c) {
+    mat.resize(r);
+    FOR(i,0,r) {
+        mat[i].resize(c);
+        FOR(j,0,c) {
+            cin >> mat[i][j];
+        }
+    }
+}
+
 class Problem {
 public:
     int T;
@@ -46,51 +71,19 @@ public:
     }
 
     int N;
-    VI order;
-    VI p;
-    VI mark;
-    void init() {
-        mark.resize(N + 1);
-        fill(mark.begin(), mark.end(), -1);
-    }
-
-    void mk_pair() {
-        p.resize(N + 1);
-        for (int i = N%2; i < N; i+=2) {
-            p[order[i]] = order[i+1];
-            p[order[i+1]] = order[i];
-        }
-        if (N & 1) {
-            p[N] = order[0];
-            p[order[0]] = N;
-        }
-    }
-
+    VEC<double> prob;
     void read() {
         cin >> N;
-        read_vec(order, N);
-        FOR(i,0,N) order[i]--;
-        init();
-    }
-
-    void dfs(int x, int d) {
-        mark[x] = d;
-        if (mark[x^1] == -1) dfs(x^1, d^1);
-        if (mark[p[x]] == -1) dfs(p[x], d^1);
+        read_vec(prob, N*2);
     }
 
     void solve(int ca) {
-        mk_pair();
+        sort(prob.begin(), prob.end());
+        double ans = 1;
         for (int i = 0; i < N; i++) {
-            if (mark[i] == -1) dfs(i, LEFT);
+            ans *= (1 - prob[i]*prob[2*N-i-1]);
         }
-
-        string ans;
-        FOR(i,0,N) {
-            ans += mark[i] == 0 ? 'L':'R'; 
-        }
-
-        cout << "Case #" << ca << ": " << ans << endl;
+        cout << "Case #" << ca << ": " ; printf("%.7f\n", ans);
     }
 };
 
@@ -99,3 +92,4 @@ int main() {
     p.go();
     return 0;
 }
+
