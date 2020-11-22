@@ -81,7 +81,7 @@ public:
         for (int i = 1; i < B; i++) {
             dis[i][i] = 0;
             for (int k = 0; k < i; k++) {
-                int x;
+                ll x;
                 cin >> x;
                 dis[i][k] = dis[k][i] = 2 * x;
             }
@@ -95,7 +95,7 @@ public:
                 FOR(j,0,B) {
                     if (dis[i][k] >= 0 && dis[k][j] >=0) {
                         if (dis[i][j] < 0 || dis[i][k] + dis[k][j] < dis[i][j]) {
-                            dis[i][j] = dis[i][k] + dis[k][j];
+                            dis[j][i] = dis[i][j] = dis[i][k] + dis[k][j];
                         }
                     }
                 }
@@ -104,46 +104,38 @@ public:
     }
 
     bool isOK(ll d, int a, int b) {
-        ll da = path[a][b];
-        ll db = path[a][b];
+        ll ab = path[a][b];
+        VEC<pair<ll,ll>> cover;
         for (int i = 0; i < B; i++) {
             if (dis[i][a] > d && dis[i][b] > d) return false;
-            if (dis[i][a] > d) db = min(db, d - dis[i][b]);
-            if (dis[i][b] > d) da = min(da, d - dis[i][a]);
-        }
-        
-        ll toB = path[a][b] - da;
-        ll toA = path[a][b] - db;
-
-        bool canFromA = true;
-        for (int i = 0; i < B; i++) {
-            bool ok = dis[i][a] + da <= d || dis[i][b] + toB <= d;
-            if(!ok) {
-                canFromA = false; break;
+            if (d - dis[i][a] + d - dis[i][b] >= ab) {
+                continue;
             }
+            cover.push_back(make_pair(d - dis[i][a] + 1, ab - d + dis[i][b] - 1));
         }
-        if (canFromA) return true;
-
-        bool canFromB = true;
-        for (int i = 0; i < B; i++) {
-            bool ok = dis[i][b] + db <= d || dis[i][a] + toA <= d ;
-            if(!ok) {
-                canFromB = false; break;
-            }
+        if (cover.size() == 0) {
+            return true;
         }
-        if (canFromB) return true;
-        return false;
+        sort(cover.begin(), cover.end());
+        ll v = 0;
+        for (auto& p : cover) {
+            if (p.first > v) return true;
+            v = max(v, p.second);
+        }
+        return v < ab;
     }
 
-    ll minDis(int a, int b) {
+    ll minDis(int a, int b, ll curMin) {
 
         ll low = 0;
         ll high = 0;
         for (int i = 0; i < B; i++) {
             low = max(low, min(dis[i][a], dis[i][b]));
-            high = max(high, dis[i][a]);
-            high = max(high, dis[i][b]);
+            high = max(high, dis[i][a] + path[a][b]);
+            high = max(high, dis[i][b] + path[a][b]);
         }
+        low = min(curMin, low);
+        high = min(curMin, high);
         while (low < high) {
             ll mid = (low + high) / 2;
             if(isOK(mid, a, b)) {
@@ -161,12 +153,12 @@ public:
         FOR(i,0,B) {
             FOR(j,0,i) {
                 if (path[i][j] > 0) {
-                    minAns = min(minAns, minDis(i,j));
+                    minAns = min(minAns, minDis(i,j,minAns));
                 }
             }
         }
         cout << "Case #" << ca << ": ";
-        printf("%.7f\n", minAns / 2.0);
+        printf("%.8f\n", minAns / 2.0);
     }
 };
 
@@ -175,5 +167,4 @@ int main() {
     p.go();
     return 0;
 }
-
 

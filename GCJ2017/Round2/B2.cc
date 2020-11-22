@@ -21,6 +21,7 @@ using VVI = vector<VI>;
 template<typename T>
 using VEC = vector<T>;
 
+
 template<typename T>
 void fill_vec(VEC<T>& vec, int n, T val) {
     vec.resize(n);
@@ -55,23 +56,39 @@ public:
         }
     }
 
+    bool isOK(int ride) {
+        int sum = 0;
+        for (int i = 0; i < N; i++) {
+            sum += tOfP[i];
+            if (sum > (i+1)*ride) return false;
+        }
+        return true;
+    }
+
     void solve(int ca) {
         int r = 0;
         for (auto bc : tOfB) r = max(r, bc);
-        int cnt = 0;
-        for (int i = 0; i < N; i++) {
-            cnt += tOfP[i];
-            r = max(r, (cnt + i) / (i + 1));
+
+        int left = r, right = M;
+        while (left < right) {
+            int mid = (left + right) / 2;
+            if (!isOK(mid)) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
         }
 
+        int minRide = left;
         int pro = 0;
         for (int i = 0; i < N; i++) {
             int c = tOfP[i];
-            if (c > r) {
-                pro += c - r;
+            if (c > minRide) {
+                pro += c - minRide;
             }
         }
-        cout << "Case #" << ca << ": " << r << " " << pro << endl;
+
+        cout << "Case #" << ca << ": " << minRide << " " << pro << endl;
     }
 };
 
